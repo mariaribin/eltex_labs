@@ -11,7 +11,7 @@ int task1_hw2()
 
     if (n <= 0)
     {
-        printf("Impossible size of matrix\n");
+        printf("Impossiple size of matrix\n");
         return 0;
     }
 
