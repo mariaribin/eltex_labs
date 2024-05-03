@@ -6,7 +6,7 @@ int main()
 {
     printf("The size of aray is %d.\n", SIZE);
 
-    if (SIZE == 0)
+    if (0 == SIZE)
     {
         printf("%d is an incorrect size of matrix.\nThe matrix size should be more than 0!\n", SIZE);
 
@@ -44,5 +44,4 @@ int main()
     printf("\n");
 
     return 0;
-
 }
