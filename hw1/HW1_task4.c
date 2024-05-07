@@ -1,10 +1,14 @@
+/*Поменять в целом положительном числе (типа int) значение третьего
+байта на введенное пользователем число (изначальное число также
+вводится с клавиатуры)*/
+
 #include <stdio.h>
+#define SIZE1 32
+#define SIZE2 8
 
-#define SIZE 32
-
-/*the function calculates the power of two, 
+/*the function calculates the power of two,
 which is passed by value*/
-int power_of_two(char power) 
+int power_of_two(char const power)
 {
     int mult = 1;
     
@@ -18,39 +22,38 @@ int power_of_two(char power)
 
 /*the function takes two values 
 and changes the 3rd byte of value 1 to value 2*/
-void binary_number(unsigned int a, unsigned char b) 
+void change_third_byte(unsigned int a, unsigned char b)
 {
     const unsigned int mask = 1;
-    
-    int array[SIZE] = {0};
-    int array2[8] = {0};
-    
-    for (int i = SIZE - 1; i >= 0 ; i--) 
+    int number_1[SIZE1] = {0};
+    int number_2[SIZE2] = {0};
+
+    for (int i = SIZE1 - 1; i >= 0 ; i--)
     {
-        array[i] = mask & a;
+        number_1[i] = mask & a;
         a = a >> 1;
     }
 
-    printf("Number 1 in binary: "); 
+    printf("Number 1 in binary: ");
 
-    for (int i = 0; i < SIZE; i++)
+    for (int i = 0; i < SIZE1; i++)
     {
-        printf("%d", array[i]); 
+        printf("%d", number_1[i]);
     }
 
     printf("\n");
 
-    for (int i = 7; i >= 0 ; i--) 
+    for (int i = SIZE2 - 1; i >= 0 ; i--)
     {
-        array2[i] = mask & b;
+        number_2[i] = mask & b;
         b = b >> 1;
     }
 
-    printf("Number 2 in binary: "); 
+    printf("Number 2 in binary: ");
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < SIZE2; i++)
     {
-        printf("%d", array2[i]); 
+        printf("%d", number_2[i]);
     }
     
     printf("\n");
@@ -58,17 +61,17 @@ void binary_number(unsigned int a, unsigned char b)
     // the 3rd byte of value 1 is changed
     int j = 0;
 
-    for (int i = 8; i < 16; i++) 
+    for (int i = SIZE1 - 24; i < SIZE1 - 16; i++)
     {
-         array[i] = array2[j];
-         j++;
+        number_1[i] = number_2[j];
+        j++;
     }
   
-    printf("Binary Number 1 with CHANGED 3rd byte: "); 
+    printf("Binary Number 1 with CHANGED 3rd byte: ");
     
-    for (int i = 0; i < SIZE; i++)
+    for (int i = 0; i < SIZE1; i++)
     {
-        printf("%d", array[i]); 
+        printf("%d", number_1[i]);
     }
 
     printf(" ");
@@ -77,32 +80,30 @@ void binary_number(unsigned int a, unsigned char b)
     char counter = 31;
 
     // converting changed value 1 from binary to decimal
-    for (int i = 0; i < SIZE; i++) 
-    {
-        
-        if (array[i] == 1)
+    for (int i = 0; i < SIZE1; i++)
+    {    
+        if (number_1[i] == 1)
         {
             decimal_number = decimal_number + power_of_two(counter);
-            
         }
         
         counter--;
     }
     
-    printf("(= %u decimal)", decimal_number); 
+    printf("(= %u decimal)", decimal_number);
 }
 
 int main()
 {
-    unsigned int a = 0;
-    unsigned char b = 0;
+    unsigned int num1 = 0;
+    unsigned char num2 = 0;
 
     printf("Insert Number 1: ");
-    scanf("%u", &a);
+    scanf("%u", &num1);
     printf("Insert Number 2 (0...255): ");
-    scanf("%hhd", &b);
+    scanf("%hhd", &num2);
 
-    binary_number(a, b);
+    change_third_byte(num1, num2);
     printf("\n");
 
     return 0;

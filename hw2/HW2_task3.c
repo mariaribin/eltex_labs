@@ -1,26 +1,20 @@
-#include <stdio.h>
+/*аполнить верхний треугольник матрицы а нижний 0.*/
 
+#include <stdio.h>
 #define SIZE 10
 
 int main()
 {
     printf("The size of matrix is %dx%d:\n", SIZE, SIZE);
 
-    if (0 == SIZE)
-    {
-        printf("%d is an incorrect size of matrix.\nThe matrix size should be more than 0!\n", SIZE);
-        return 0;
-    }
-
-    int array[SIZE][SIZE]; 
-
+    int array[SIZE][SIZE] = {0};
     int limit = SIZE;
 
     /*here we fill each row with 1's (from left to right -->)
     and with 0's (from right to left <--)*/
     for (int i = 0; i < SIZE; i++)
     {
-        for (int j = 0; j < limit; j++) 
+        for (int j = 0; j < limit; j++)
         {
             array[i][j] = 1;
         }
