@@ -10,14 +10,14 @@
 which is passed by value*/
 int power_of_two(char const power)
 {
-    int mult = 1;
+    int multiply = 1;
     
     for (int i = 0; i < power; i++)
     {
-        mult = mult * 2;
+        multiply = multiply * 2;
     }
 
-    return mult;
+    return multiply;
 }
 
 /*the function takes two values 
@@ -77,7 +77,7 @@ void change_third_byte(unsigned int a, unsigned char b)
     printf(" ");
 
     unsigned int decimal_number = 0;
-    char counter = 31;
+    char counter = SIZE1 - 1;
 
     // converting changed value 1 from binary to decimal
     for (int i = 0; i < SIZE1; i++)
