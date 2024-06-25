@@ -10,12 +10,10 @@ int main()
 {
     int array[SIZE] = {0};
     int *p_array = &array[0];
-    int counter = 1;
 
     for (int i = 0; i < SIZE; i++)
     {
-        array[i] = counter;
-        counter++;
+        array[i] = i + 1;
     }
 
     for (int i = 0; i < SIZE; i++)

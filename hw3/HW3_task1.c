@@ -39,9 +39,9 @@ int main()
     printf("Insert Number 2 (0...255): ");
     scanf("%hhd", &num2);
 
-    char *ptr = &num1;
+    char *ptr = (char *)&num1;
 
-    ptr+=2;
+    ptr += 2;
     *ptr = num2; 
 
     printf("The 3d byte was changed.\n");
