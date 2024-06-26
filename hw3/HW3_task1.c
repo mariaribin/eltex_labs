@@ -6,6 +6,7 @@
 #include <stdio.h>
 #define SIZE 32
 
+/*function prints a decimal number as binary*/
 void binary_number(int num)
 {
     const unsigned int mask = 1;
@@ -23,7 +24,7 @@ void binary_number(int num)
     {
         printf("%d", number[i]);
     }
-    
+
     printf("\n");
 }
 
@@ -41,8 +42,9 @@ int main()
 
     char *ptr = (char *)&num1;
 
+    /*changing the 3rd byte of number 1*/
     ptr += 2;
-    *ptr = num2; 
+    *ptr = num2;
 
     printf("The 3d byte was changed.\n");
     binary_number(num1);

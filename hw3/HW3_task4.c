@@ -16,7 +16,7 @@ int main()
     char *p_substring = NULL;
 
     printf("Type any string: ");
-    fgets(string, SIZE1, stdin);  
+    fgets(string, SIZE1, stdin);
 
     printf("\nType any substring to find: ");
     fgets(substring, SIZE2, stdin);
@@ -24,7 +24,6 @@ int main()
     int const len_str = strlen(string);
     int const len_substr = strlen(substring);
     int counter = 0;
-
     int j = 0;
 
     for (int i = 0; i < len_str; i++)

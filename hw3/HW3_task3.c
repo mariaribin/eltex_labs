@@ -9,7 +9,7 @@
 int main()
 {
     int array[SIZE] = {0};
-    int *p_array = &array[0];
+    int *p_array = array;
 
     for (int i = 0; i < SIZE; i++)
     {
