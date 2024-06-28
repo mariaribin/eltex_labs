@@ -44,10 +44,10 @@ void add_abonent(struct Abonent *abonent)
     printf("Tel. number: ");
     scanf("%s", abonent->tel);
 
-    sprintf(abonent->info, "Name: %s %s | Tel.number: %s",
+    snprintf(abonent->info, sizeof(abonent->info), "Name: %s %s | Tel.number: %s",
     abonent->name, abonent->surname, abonent->tel);
 
-    abonent->exist = true; //flag shows if the person exists
+    abonent->exist = true;
 }
 
 void print_all_abonents(struct Abonent *abonent)
@@ -60,7 +60,7 @@ void print_all_abonents(struct Abonent *abonent)
     {
         if (abonent[i].exist)
         {
-            printf("%d) %s (index %d)\n", counter, abonent[i].info, 
+            printf("%d) %s (index %d)\n", counter, abonent[i].info,
             abonent[i].index);
 
             counter++;
@@ -82,10 +82,10 @@ void delete_abonent(struct Abonent *abonent)
     {
         if (number == abonent[i].index)
         {
-            memset(abonent[i].info, 0, SIZE_INFO);
-            memset(abonent[i].name, 0, SIZE_NAME);
-            memset(abonent[i].surname, 0, SIZE_NAME);
-            memset(abonent[i].tel, 0, SIZE_TEL_NUM);
+            memset(abonent[i].info, 0, sizeof(abonent[i].info));
+            memset(abonent[i].name, 0, sizeof(abonent[i].name));
+            memset(abonent[i].surname, 0, sizeof(abonent[i].surname));
+            memset(abonent[i].tel, 0, sizeof(abonent[i].tel));
 
             abonent[i].exist = false;
         }
@@ -116,7 +116,7 @@ int main()
     struct Abonent abonent[SIZE_CATALOGUE] = {0};
 
     char menu = 0;
-    char run = 1;
+    bool run = true;
     int counter = 0;
     int i = 0;
 
@@ -153,11 +153,11 @@ int main()
                     {
                         if (abonent[j].exist == false)
                         {
-                            add_abonent(&abonent[j]); 
+                            add_abonent(&abonent[j]);
                             counter++;
                             break;
                         }
-                    }      
+                    }
                 }
 
                 break;
