@@ -114,7 +114,6 @@ void search_abonent(struct Abonent *abonent)
 int main()
 {
     struct Abonent abonent[SIZE_CATALOGUE] = {0};
-
     char menu = 0;
     bool run = true;
     int counter = 0;
@@ -128,8 +127,8 @@ int main()
     }
 
     printf("Type 1-5 to:\n1 - Add subscriber.\n"
-    "2 - Delete subscriber.\n3 - Find subscribers by name.\n"
-    "4 - Show all.\n5 - Exit.\n");
+        "2 - Delete subscriber.\n3 - Find subscribers by name.\n"
+        "4 - Show all.\n5 - Exit.\n");
 
     while (run)
     {
@@ -198,7 +197,7 @@ int main()
             case 6:
             {
                 printf("\n1 - Add subscriber.\n2 - Delete subscriber.\n"
-                "3 - Find subscribers by name.\n4 - Show all.\n5 - Exit.\n");
+                    "3 - Find subscribers by name.\n4 - Show all.\n5 - Exit.\n");
                 break;
             }
 
