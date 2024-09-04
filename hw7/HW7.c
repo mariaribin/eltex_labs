@@ -11,7 +11,7 @@ int main()
 
     while(run)
     {
-        printf("Insert values A and B:\n");   
+        printf("Insert values A and B:\n");
         scanf("%d", &Num_a);
         scanf("%d", &Num_b);
 

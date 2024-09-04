@@ -12,4 +12,3 @@ clean:
 	rm libmath.a
 	rm *.o
 	
-	
