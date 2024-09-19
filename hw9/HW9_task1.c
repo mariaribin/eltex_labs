@@ -11,7 +11,6 @@ int main()
     int length = sizeof(message);
 
     FILE *file = fopen("output.txt", "w+");
-
     if(!file)
     {
         perror("open failed");

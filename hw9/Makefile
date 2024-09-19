@@ -1,6 +1,6 @@
 run:
 	gcc -c HW9_task1.c 
-	gcc -o run HW9_task1.o
+	gcc -o run1 HW9_task1.o
 
 clean:
 	rm run*
