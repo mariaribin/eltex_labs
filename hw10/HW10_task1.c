@@ -9,13 +9,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-
-
 int main()
 {
-    pid_t pid = getpid();
-    pid_t pid_child;
-    int wstatus;
+    pid_t pid_child = 0;
+    int wstatus = 0;
      
     pid_t ret = fork();
     if(-1 == ret)
@@ -23,13 +20,12 @@ int main()
         perror("fork failed");
         exit(-1);
     }
-    
+
     if(0 == ret)
     {
         printf("Child process.\n"
                 "My pid = %d\n"
                 "My ppid = %d\n", getpid(), getppid());
-        sleep(100);
         exit(0);
     }
     else
@@ -37,7 +33,6 @@ int main()
         printf("Parent process.\n"
                 "My pid = %d\n"
                 "My ppid = %d\n", getpid(), getppid());
-
 
         pid_child = wait(&wstatus);
         if(-1 == pid_child)
@@ -51,6 +46,5 @@ int main()
         printf("Child process with pid %d returned %d\n", pid_child, child_ret);
         exit(0); 
     }
-
     return 0;
 }

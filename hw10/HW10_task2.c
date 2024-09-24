@@ -33,7 +33,7 @@ int main()
     
     if(0 == ret1)
     {
-        printf("Child process 1. My pid = %d My ppid = %d\n", 
+        printf("Child process 1. My pid = %d My ppid = %d\n",
         getpid(), getppid());
 
         pid_t ret3 = fork();
@@ -45,7 +45,7 @@ int main()
 
         if(0 == ret3)
         {
-            printf("Child process 3. My pid = %d My ppid = %d\n", 
+            printf("Child process 3 (from process 1). My pid = %d My ppid = %d\n",
             getpid(), getppid());
             exit(0);
         }
@@ -60,7 +60,7 @@ int main()
 
             if(0 == ret4)
             {
-                printf("Child process 4. My pid = %d My ppid = %d\n", 
+                printf("Child process 4 (from process 1). My pid = %d My ppid = %d\n",
                 getpid(), getppid());
                 exit(0);
             }
@@ -82,10 +82,10 @@ int main()
 
                 int child_ret_3 = WIFEXITED(wstatus_3);
                 int child_ret_4 = WIFEXITED(wstatus_4);
-        
-                printf("Child process with pid %d returned status %d\n", 
+
+                printf("Child process with pid %d returned status %d\n",
                 pid_child_3, child_ret_3);
-                printf("Child process with pid %d returned status %d\n", 
+                printf("Child process with pid %d returned status %d\n",
                 pid_child_4, child_ret_4);
             }
         }
@@ -105,7 +105,7 @@ int main()
 
         if(0 == ret2)
         {
-            printf("Child process 2. My pid = %d My ppid = %d\n", 
+            printf("Child process 2. My pid = %d My ppid = %d\n",
             getpid(), getppid());
 
             pid_t ret5 = fork();
@@ -117,7 +117,7 @@ int main()
 
             if(0 == ret5)
             {
-                printf("Child process 5. My pid = %d My ppid = %d\n", 
+                printf("Child process 5 (from process 2). My pid = %d My ppid = %d\n",
                 getpid(), getppid());
                 exit(0);
             }
@@ -130,7 +130,7 @@ int main()
             }
 
             int child_ret_5 = WIFEXITED(wstatus_5);
-            printf("Child process with pid %d returned status %d\n", 
+            printf("Child process with pid %d returned status %d\n",
             pid_child_5, child_ret_5);
 
             exit(0);
@@ -153,10 +153,10 @@ int main()
 
             int child_ret_1 = WIFEXITED(wstatus_1);
             int child_ret_2 = WIFEXITED(wstatus_2);
-        
-            printf("Child process with pid %d returned status %d\n", 
+
+            printf("Child process with pid %d returned status %d\n",
             pid_child_1, child_ret_1);
-            printf("Child process with pid %d returned status %d\n", 
+            printf("Child process with pid %d returned status %d\n",
             pid_child_2, child_ret_2);   
         }
     }
