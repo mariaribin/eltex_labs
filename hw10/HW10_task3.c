@@ -1,3 +1,10 @@
+/*Реализовать аналог командного интерпретатора bash. При запуске
+программы пользователю предлагается ввести имя программы и опции
+запуска программы. Программа порождает процесс и в нем выполняет
+введенную программу с заданными опциями, ждет завершения
+дочернего процесса. Снова возвращается к вводу следующей
+программы. Выход из интерпретатора по команде exit.*/
+
 #include <stdio.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -7,7 +14,6 @@
 #include <sys/wait.h>
 #include <stdbool.h>
 #include <string.h>
-
 #define COMMAND_SIZE 20
 
 int main()
@@ -41,7 +47,7 @@ int main()
                 i = 0;
                 continue;
             }
-            
+
             if ('\n' == sym && count <= 5)
             {
                 count++;
@@ -57,7 +63,7 @@ int main()
                     free(args[i]);
                     args[i] = NULL;
                 }
-                
+
                 memset(name, 0, 255);
                 count = 0;
                 i = 0;
@@ -87,13 +93,6 @@ int main()
         if(0 == ret)
         {
             return 0;
-        }
-
-        printf("name = %s\n", name);
-
-        for (i = 0; i < count; i++)
-        {
-            printf("%s\n", args[i]);
         }
 
         pid_t ret_fork = fork();
