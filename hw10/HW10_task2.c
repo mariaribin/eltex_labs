@@ -13,75 +13,72 @@ pid, ppid.*/
 
 int main()
 {
-    pid_t pid_child_1 = 0;
-    pid_t pid_child_2 = 0;
-    pid_t pid_child_3 = 0;
-    pid_t pid_child_4 = 0;
-    pid_t pid_child_5 = 0;
     int wstatus_1 = 0;
     int wstatus_2 = 0;
     int wstatus_3 = 0;
     int wstatus_4 = 0;
     int wstatus_5 = 0;
 
-    pid_t ret1 = fork();
-    if(-1 == ret1)
+    pid_t fork_ret1 = fork();
+    if(-1 == fork_ret1)
     {
-        perror("fork failed");
+        perror("fork() failed");
         exit(-1);
     }
-    
-    if(0 == ret1)
+    else if(0 == fork_ret1)
     {
         printf("Child process 1. My pid = %d My ppid = %d\n",
         getpid(), getppid());
 
-        pid_t ret3 = fork();
-        if(-1 == ret3)
+        pid_t fork_ret3 = fork();
+        if(-1 == fork_ret3)
         {
-            perror("fork failed");
+            perror("fork() failed");
             exit(-1);
         }
-
-        if(0 == ret3)
+        else if(0 == fork_ret3)
         {
-            printf("Child process 3 (from process 1). My pid = %d My ppid = %d\n",
+            printf("Child process 3 (from parent process 1). My pid = %d My ppid = %d\n",
             getpid(), getppid());
             exit(0);
         }
         else
         {
-            pid_t ret4 = fork();
-            if(-1 == ret4)
+            pid_t fork_ret4 = fork();
+            if(-1 == fork_ret4)
             {
-                perror("fork failed");
+                perror("fork() failed");
                 exit(-1);
             }
-
-            if(0 == ret4)
+            else if(0 == fork_ret4)
             {
-                printf("Child process 4 (from process 1). My pid = %d My ppid = %d\n",
+                printf("Child process 4 (from parent process 1). My pid = %d My ppid = %d\n",
                 getpid(), getppid());
                 exit(0);
             }
             else
             {   
-                pid_child_3 = waitpid(ret3, &wstatus_3, WUNTRACED);
+                pid_t pid_child_3 = 0;
+                pid_t pid_child_4 = 0;
+                int child_ret_3 = 0;
+                int child_ret_4 = 0;
+                
+                pid_child_3 = waitpid(fork_ret3, &wstatus_3, WUNTRACED);
                 if(-1 == pid_child_3)
                 {
-                    perror("wait failed");
+                    perror("wait() failed");
                     exit(-1);
                 }
 
-                pid_child_4 = waitpid(ret4, &wstatus_4, WUNTRACED);
+                pid_child_4 = waitpid(fork_ret4, &wstatus_4, WUNTRACED);
                 if(-1 == pid_child_3)
                 {
-                    perror("wait failed");
+                    perror("wait() failed");
                     exit(-1);
                 }
 
-                int child_ret_3 = WIFEXITED(wstatus_3);
-                int child_ret_4 = WIFEXITED(wstatus_4);
+                child_ret_3 = WIFEXITED(wstatus_3);
+                child_ret_4 = WIFEXITED(wstatus_4);
 
                 printf("Child process with pid %d returned status %d\n",
                 pid_child_3, child_ret_3);
@@ -96,63 +93,72 @@ int main()
         printf("Parent process. My pid = %d My ppid = %d\n", 
         getpid(), getppid());
 
-        pid_t ret2 = fork();
-        if(-1 == ret2)
+        pid_t fork_ret2 = fork();
+        if(-1 == fork_ret2)
         {
-            perror("fork failed");
+            perror("fork() failed");
             exit(-1);
         }
-
-        if(0 == ret2)
+        else if(0 == fork_ret2)
         {
+            pid_t fork_ret5 = 0;
+            pid_t pid_child_5 = 0;
+            int child_ret_5 = 0;
+
             printf("Child process 2. My pid = %d My ppid = %d\n",
             getpid(), getppid());
 
-            pid_t ret5 = fork();
-            if(-1 == ret5)
+            fork_ret5 = fork();
+            if(-1 == fork_ret5)
             {
-                perror("fork failed");
+                perror("fork() failed");
                 exit(-1);
             }
-
-            if(0 == ret5)
+            else if(0 == fork_ret5)
             {
-                printf("Child process 5 (from process 2). My pid = %d My ppid = %d\n",
+                printf("Child process 5 (from parent process 2). My pid = %d My ppid = %d\n",
                 getpid(), getppid());
                 exit(0);
             }
-
-            pid_child_5 = waitpid(ret5, &wstatus_5, WUNTRACED);
-            if(-1 == pid_child_5)
+            else
             {
-                perror("wait failed");
-                exit(-1);
+                pid_child_5 = waitpid(fork_ret5, &wstatus_5, WUNTRACED);
+                if(-1 == pid_child_5)
+                {
+                    perror("wait failed");
+                    exit(-1);
+                }
+
+                child_ret_5 = WIFEXITED(wstatus_5);
+                printf("Child process with pid %d returned status %d\n",
+                pid_child_5, child_ret_5);
+
+                exit(0);
             }
-
-            int child_ret_5 = WIFEXITED(wstatus_5);
-            printf("Child process with pid %d returned status %d\n",
-            pid_child_5, child_ret_5);
-
-            exit(0);
         }
         else
         {
-            pid_child_1 = waitpid(ret1, &wstatus_1, WUNTRACED);
+            pid_t pid_child_1 = 0;
+            pid_t pid_child_2 = 0;
+            int child_ret_1 = 0;
+            int child_ret_2 = 0;
+            
+            pid_child_1 = waitpid(fork_ret1, &wstatus_1, WUNTRACED);
             if(-1 == pid_child_1)
             {
-                perror("wait failed");
+                perror("wait() failed");
                 exit(-1);
             }
 
-            pid_child_2 = waitpid(ret2, &wstatus_2, WUNTRACED);
+            pid_child_2 = waitpid(fork_ret2, &wstatus_2, WUNTRACED);
             if(-1 == pid_child_2)
             {
-                perror("wait failed");
+                perror("wait() failed");
                 exit(-1);
             }
 
-            int child_ret_1 = WIFEXITED(wstatus_1);
-            int child_ret_2 = WIFEXITED(wstatus_2);
+            child_ret_1 = WIFEXITED(wstatus_1);
+            child_ret_2 = WIFEXITED(wstatus_2);
 
             printf("Child process with pid %d returned status %d\n",
             pid_child_1, child_ret_1);

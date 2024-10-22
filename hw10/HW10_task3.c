@@ -1,10 +1,4 @@
-/*Реализовать аналог командного интерпретатора bash. При запуске
-программы пользователю предлагается ввести имя программы и опции
-запуска программы. Программа порождает процесс и в нем выполняет
-введенную программу с заданными опциями, ждет завершения
-дочернего процесса. Снова возвращается к вводу следующей
-программы. Выход из интерпретатора по команде exit.*/
-
+#include <stdio.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -14,58 +8,136 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define COMMAND_SIZE 20
+
 int main()
-{ 
-    pid_t pid_child = 0;
-    int wstatus = 0;
-    int ret_child = 0;
-    int ret_strcmp = 0;
-    int ret_sprintf = 0;
-    char buf[260] = {0};
-    char program_name[255] = {0};
-    char arg1[10] = {0};
+{  
+    char *args[6] = {0};
+    char name[255] = {0};
     char ex[5] = "exit";
-    bool run = true;
+    int count = 0;
+    int i = 0;
+    int ret = 0;
 
-    while(run)
-    {
-        printf("Enter name of program and flag: ");
-        scanf("%255s %10s", program_name, arg1);
+    while(1)
+    {   
+        args[0] = name;
 
-        ret_strcmp = strcmp(program_name, ex);
-        if(0 == ret_strcmp)
+        printf("Enter name of program and parameters: ");
+
+        while(1)
+        {   
+            char sym = getc(stdin);
+
+            if ((' ' == sym || '\n' == sym) && 0 == name[0])
+            {
+                i = 0;
+                continue;
+            }
+
+            if (' ' == sym && 0 != name[0])
+            {
+                count++;         
+                i = 0;
+                continue;
+            }
+            
+            if ('\n' == sym && count <= 5)
+            {
+                count++;
+                break;
+            }
+
+            if ('\n' == sym && count > 5)
+            {
+                perror("too many arguments");
+
+                for (i = 1; i < 5; i++)
+                {
+                    free(args[i]);
+                    args[i] = NULL;
+                }
+                
+                memset(name, 0, 255);
+                count = 0;
+                i = 0;
+
+                printf("Enter name of program and parameters: ");
+                continue;
+            }
+            
+            if (!args[count] && count <= 5)
+            {
+                args[count] = calloc(COMMAND_SIZE, sizeof(char));
+            }
+
+            if (0 == count)
+            {
+                name[i] = sym;
+            }
+            else if(count <= 5)
+            {
+                args[count][i] = sym;
+            }
+
+            i++;
+        }
+
+        ret = strcmp(name, ex);
+        if(0 == ret)
         {
             return 0;
         }
-        
+
+        printf("name = %s\n", name);
+
+        for (i = 0; i < count; i++)
+        {
+            printf("%s\n", args[i]);
+        }
+
         pid_t ret_fork = fork();
         if(-1 == ret_fork)
         {
             perror("fork() failed");
+            exit(-1);
         }
-
-        if(0 == ret_fork)
+        else if(0 == ret_fork)
         {
-            pid_t ret_exec = execlp(program_name, program_name, arg1, NULL);
-            if(-1 == ret_exec)
+            ret = execvp(name, args);
+            if(-1 == ret)
             {
-                perror("execl() failed");
+                perror("execvp() failed");
+                exit(-1);
             }
+
             exit(0);
         }
         else
         {
-            pid_child = waitpid(ret_fork, &wstatus, WUNTRACED);
+            int wstatus = 0;
+            int pid_child = waitpid(ret_fork, &wstatus, WUNTRACED);
             if(-1 == pid_child)
             {
-                perror("wait failed");
+                perror("wait() failed");
                 exit(-1);
             }
 
-            ret_child = WIFEXITED(wstatus);
+            int ret_child = WIFEXITED(wstatus);
             printf("\nChild process with pid %d returned status %d\n",
             pid_child, ret_child);
-        }
+
+            //cleaning
+            for (i = 1; i <= count; i++)
+            {
+                free(args[i]);
+                args[i] = NULL;
+            }
+            args[0] = NULL;
+            memset(name, 0, 255);
+            i = 0;
+            count = 0;
+        }  
     }
     return 0;
 }

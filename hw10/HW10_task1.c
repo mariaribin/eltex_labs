@@ -17,11 +17,10 @@ int main()
     pid_t ret = fork();
     if(-1 == ret)
     {
-        perror("fork failed");
+        perror("fork() failed");
         exit(-1);
     }
-
-    if(0 == ret)
+    else if(0 == ret)
     {
         printf("Child process.\n"
                 "My pid = %d\n"
@@ -37,7 +36,7 @@ int main()
         pid_child = wait(&wstatus);
         if(-1 == pid_child)
         {
-            perror("wait failed");
+            perror("wait() failed");
             exit(-1);
         }
 
