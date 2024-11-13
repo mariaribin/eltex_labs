@@ -11,7 +11,7 @@ int main()
     int ret = 0;
     char response[10] = {0};
     char message[10] = {0};
-    
+
     network_socket = socket(AF_INET, SOCK_DGRAM, 0);
 
     struct sockaddr_in server_address;
@@ -29,7 +29,7 @@ int main()
         close(network_socket);
         return -1;
     }
-    
+
     ret = recvfrom(network_socket, &response, sizeof(response), 0, NULL, NULL);
     if (-1 == ret)
     {
