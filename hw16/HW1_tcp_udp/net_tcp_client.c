@@ -13,6 +13,11 @@ int main()
     char message[10] = {0};
 
     network_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (-1 == network_socket)
+    {
+        perror("Creating socket failed");
+        return -1;
+    }
 
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
