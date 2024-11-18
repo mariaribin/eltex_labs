@@ -53,8 +53,6 @@ int main()
             return -1;
         }
 
-        printf("\nsocket %d\n", client_socket);
-
         pid_t pid = fork();
         if (0 == pid)
         {
