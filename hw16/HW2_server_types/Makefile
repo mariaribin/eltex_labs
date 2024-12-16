@@ -14,11 +14,15 @@ run:
 	gcc -c server2.c
 	gcc -o server2 -g server2.o -lpthread
 
+	gcc -c server3.c
+	gcc -o server3 server3.o -lrt -lpthread
+
 
 clean:
 	rm *.o
 	rm server1
 	rm server2
+	rm server3
 	rm client1
 	rm client11
 	rm client2
