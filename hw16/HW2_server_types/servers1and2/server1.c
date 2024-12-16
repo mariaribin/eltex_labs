@@ -42,9 +42,12 @@ int main()
         return -1;
     }
 
+    struct sockaddr addr;
+    socklen_t len = sizeof(addr);
+
     while(1)
     {
-        client_socket = accept(server_socket, NULL, NULL);
+        client_socket = accept(server_socket, (struct sockaddr * restrict)&addr, (socklen_t * restrict)&len);
         if (-1 == client_socket)
         {
             perror("Accepting client failed.");
@@ -53,14 +56,13 @@ int main()
             return -1;
         }
 
-        printf("\nsocket %d\n", client_socket);
-
         pid_t pid = fork();
         if (0 == pid)
         {
             close(server_socket);
 
             printf("\nThis is a new process %d with socket %d\n", getpid(), client_socket);
+            printf("\nAddress of new client = %d\n", addr.sa_data);
 
             ret = recv(client_socket, &message, sizeof(message), 0);
             if (-1 == ret)
@@ -86,7 +88,8 @@ int main()
         else
         {
             close(client_socket);
-            while (waitpid(-1, NULL, WNOHANG) > 0);   
+            while (waitpid(-1, NULL, WNOHANG) > 0);
+            memset(&addr, 0, sizeof(addr));
         }  
     }
 

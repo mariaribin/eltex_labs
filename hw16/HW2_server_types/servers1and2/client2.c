@@ -52,6 +52,7 @@ int main()
     }
 
     printf("Server responded: %s\n", response);
+
     close(network_socket);
     return 0;
 }
