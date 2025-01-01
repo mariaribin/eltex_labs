@@ -51,22 +51,46 @@ int main()
 
     keypad(first_win, true);
 
-    bool run = true;
+    
+    int highlight = 0;
 
-    while(run)
+    while(1)
     {
+        struct get_files getfile = {0};
+        get_files(&getfile, "./");  
 
+        for (int i = 0; i < getfile.size; i++)
+        {
+            if (i == highlight)
+            {
+                wattron(first_win, A_REVERSE);
+            }
+ 
+            mvwprintw(first_win, i + 1, 1, getfile.namelist[i]->d_name);
+            wattroff(first_win, A_REVERSE);
+        }
+
+        wrefresh(first_win);
+        
         int val = wgetch(first_win);
         switch(val)
         {
             case KEY_UP:
             {   
-                run = false;
+                highlight--;
+                if (highlight < 0)
+                {
+                    highlight = 0;
+                }
                 break;
             }
             case KEY_DOWN:
             {   
-                run = false;
+                highlight++;
+                if (highlight >= getfile.size)
+                {
+                    highlight = getfile.size - 1;
+                }
                 break;
             }
         }
@@ -74,14 +98,9 @@ int main()
 
     endwin();
 
-    struct get_files getfile = {0};
+    
 
-    get_files(&getfile, "./");  
-
-    for (int i = 0; i < getfile.size; i++)
-    {
-        printf("%s\n", getfile.namelist[i]->d_name);
-    }
+    
 
     return 0;
 }
