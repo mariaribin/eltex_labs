@@ -7,6 +7,12 @@ ncurses.*/
 #include <ncurses.h>
 #include <dirent.h>
 
+struct get_files
+{
+    struct dirent **namelist;
+    int size;
+};
+
 enum Window_borders
 {
     WINDOW_HEIGHT = 23,
@@ -14,6 +20,17 @@ enum Window_borders
     WINDOW_TOP_BORDER = 0,
     WINDOW_SIDE_BORDER = 1,
 };
+
+void get_files(struct get_files *ptr, char *path)
+{      
+    int count = scandir(path, &ptr->namelist, 0, alphasort);
+    if (-1 == count)
+    {
+        perror("scandir");
+    }
+
+    ptr->size = count;
+}
 
 int main()
 {
@@ -26,7 +43,7 @@ int main()
     int xMax = 0;
     getmaxyx(stdscr, yMax, xMax);
 
-    WINDOW * first_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_TOP_BORDER, WINDOW_SIDE_BORDER);
+    WINDOW *first_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_TOP_BORDER, WINDOW_SIDE_BORDER);
     box(first_win, 0, 0);
 
     refresh();
@@ -57,20 +74,13 @@ int main()
 
     endwin();
 
-    struct dirent **namelist = NULL;
-    char path[32] = "./";
-        
-    int count = scandir(path, &namelist, 0, alphasort);
-    if (-1 == count)
-    {
-        perror("scandir");
-    }
+    struct get_files getfile = {0};
 
-    printf("\n count = %d\n", count);
+    get_files(&getfile, "./");  
 
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < getfile.size; i++)
     {
-        printf("%s\n", namelist[i]->d_name);
+        printf("%s\n", getfile.namelist[i]->d_name);
     }
 
     return 0;
