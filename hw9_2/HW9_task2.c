@@ -5,10 +5,14 @@ ncurses.*/
 
 #include <stdio.h>
 #include <ncurses.h>
+#include <dirent.h>
 
 enum Window_borders
 {
-    WINDOW_1 = 1,
+    WINDOW_HEIGHT = 23,
+    WINDOW_WIDTH = 40,
+    WINDOW_TOP_BORDER = 0,
+    WINDOW_SIDE_BORDER = 1,
 };
 
 int main()
@@ -22,7 +26,7 @@ int main()
     int xMax = 0;
     getmaxyx(stdscr, yMax, xMax);
 
-    WINDOW * first_win = newwin(23, 40, 0, 1);
+    WINDOW * first_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_TOP_BORDER, WINDOW_SIDE_BORDER);
     box(first_win, 0, 0);
 
     refresh();
@@ -50,15 +54,24 @@ int main()
             }
         }
     }
-    
-
-
-
 
     endwin();
+
+    struct dirent **namelist = NULL;
+    char path[32] = "./";
         
-    printf("\n X = %d \n", xMax);
-    printf("\n Y = %d \n", yMax);
+    int count = scandir(path, &namelist, 0, alphasort);
+    if (-1 == count)
+    {
+        perror("scandir");
+    }
+
+    printf("\n count = %d\n", count);
+
+    for (int i = 0; i < count; i++)
+    {
+        printf("%s\n", namelist[i]->d_name);
+    }
 
     return 0;
 }
