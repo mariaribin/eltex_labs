@@ -30,7 +30,31 @@ int main()
 
     keypad(first_win, true);
 
-    sleep(3);
+    bool run = true;
+
+    while(run)
+    {
+
+        int val = wgetch(first_win);
+        switch(val)
+        {
+            case KEY_UP:
+            {   
+                run = false;
+                break;
+            }
+            case KEY_DOWN:
+            {   
+                run = false;
+                break;
+            }
+        }
+    }
+    
+
+
+
+
     endwin();
         
     printf("\n X = %d \n", xMax);
