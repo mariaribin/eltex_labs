@@ -5,75 +5,36 @@ ncurses.*/
 
 #include <stdio.h>
 #include <ncurses.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
 
+enum Window_borders
+{
+    WINDOW_1 = 1,
+};
 
 int main()
 {
     initscr();
-    bool run = true;
-    int menu = 0;
-    
-    int ret = mkdir("./dir1", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    if (-1 == ret)
-    {
-        perror("make directory failed");
-        return -1;
-    }
+    noecho();
+    cbreak();
+    curs_set(0);
 
-    ret = mkdir("./dir2", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    if (-1 == ret)
-    {
-        perror("make directory failed");
-        return -1;
-    }
+    int yMax = 0;
+    int xMax = 0;
+    getmaxyx(stdscr, yMax, xMax);
 
-    ret = mkdir("./dir3", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    {
-        perror("make directory failed");
-        return -1;
-    }
+    WINDOW * first_win = newwin(23, 40, 0, 1);
+    box(first_win, 0, 0);
 
-    while(run);
-    {
-        getch(menu);
-        printf(\n);
+    refresh();
+    wrefresh(first_win);
 
-        switch(menu):
+    keypad(first_win, true);
 
-            case KEY_DOWN:
-            {
-                keypad(stdscr, true);
-            }
-
-            case KEY_UP:
-            {
-                keypad(stdscr, true);
-            }
-
-            case KEY_LEFT:
-            {
-                keypad(stdscr, true);
-            }
-
-            case KEY_RIGHT:
-            {
-                keypad(stdscr, true);
-            }
-
-    }
-
-
-
-    /*DIR *fd = opendir("./dir1");
-    if (!fd)
-    {
-        perror("open directory failed");
-        return -1;
-    }*/
-
+    sleep(3);
     endwin();
+        
+    printf("\n X = %d \n", xMax);
+    printf("\n Y = %d \n", yMax);
+
     return 0;
 }
