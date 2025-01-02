@@ -8,6 +8,8 @@ ncurses.*/
 #include <dirent.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+
 #define EMPTY_STR "                                 "
 
 struct Getfiles
@@ -18,7 +20,7 @@ struct Getfiles
 
 enum Window_borders
 {
-    WINDOW_HEIGHT = 23,
+    WINDOW_HEIGHT = 30,
     WINDOW_WIDTH = 40,
     WINDOW_TOP_BORDER = 0,
     WINDOW_SIDE_BORDER = 1,
@@ -139,26 +141,22 @@ int main()
                 {
                     break;
                 }
-
-                if (0 == strcmp(getfile.namelist[highlight]->d_name, ".."))
-                {
-
-
-                }
                 
+                char pwd[1024] = {0};
+                getcwd(pwd, 1024);
+                
+                strcat(pwd, "/");
+                strncat(pwd, getfile.namelist[highlight]->d_name, 1024);
+                chdir(pwd);
                 
                 free_files(first_win, &getfile);
-                wrefresh(first_win);
-                sleep(4);
+                get_files(&getfile, pwd);
+                highlight = 0;
+                break;
             }
         }
     }
 
     endwin();
-
-    
-
-    
-
     return 0;
 }
