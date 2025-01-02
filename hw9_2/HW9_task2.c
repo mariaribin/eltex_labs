@@ -10,7 +10,7 @@ ncurses.*/
 #include <stdlib.h>
 #include <unistd.h>
 
-#define EMPTY_STR "                                 "
+#define EMPTY_STR "                                      "
 
 struct Getfiles
 {
@@ -43,26 +43,19 @@ void get_files(struct Getfiles *ptr, char *path)
 
 void free_files(WINDOW * menuwin, struct Getfiles *file)
 {
-    for (int i = 0; i < file->size; i++)
+    for (int i = 1; i < file->size; i++)
     {
         mvwprintw(menuwin, i + 1, 1, EMPTY_STR);
     }
     
-    while(file->size--)
+    for (int i = 0; i < file->size; i++)
     {
-        if (file->namelist[file->size])
-        {
-            free(file->namelist[file->size]);
-            file->namelist[file->size] = NULL;
-        }
+        free(file->namelist[i]);
+        file->namelist[i] = NULL;
     }
 
-    if (file->namelist)
-    {
-        free(file->namelist);
-        file->namelist = NULL;
-    }
-
+    free(file->namelist);
+    file->namelist = NULL;
     file->size = 0;
 }
 
@@ -83,6 +76,8 @@ int main()
     WINDOW *sec_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_2_TOP_BORDER, WINDOW_2_SIDE_BORDER);
     box(sec_win, 0, 0);
 
+    WINDOW *ptr = first_win;
+
     refresh();
     wrefresh(first_win);
     wrefresh(sec_win);
@@ -90,78 +85,132 @@ int main()
     keypad(first_win, true);
     keypad(sec_win, true);
 
-    
-    int highlight = 0;
+    int highlight1 = 0;
+    int highlight2 = 0;
+    int *p_highlight = &highlight1;
+    char pwd1[1024] = {0};
+    char pwd2[1024] = {0};
+    char *p_pwd = pwd1;
+    bool check = false;
 
+    getcwd(pwd1, 1024);
+    getcwd(pwd2, 1024);
+
+    struct Getfiles getfile = {0};
+    get_files(&getfile, p_pwd);
     while(1)
     {
-        struct Getfiles getfile = {0};
-        get_files(&getfile, "./");  
-
         for (int i = 0; i < getfile.size; i++)
         {
-            if (i == highlight)
+            if (i == WINDOW_HEIGHT - 2)
             {
-                wattron(first_win, A_REVERSE);
+                break;
             }
             
-            char buf[32] = "/";
+            if (i == *p_highlight)
+            {
+                wattron(ptr, A_REVERSE);
+            }
+            
+            char buf[256] = "/";
             if (getfile.namelist[i]->d_type != 4)
             {
                 buf[1] = '.';
             }
 
-            strncat(buf, getfile.namelist[i]->d_name, 32);
-            mvwprintw(first_win, i + 1, 1, buf);
-            wattroff(first_win, A_REVERSE);
+            strncat(buf, getfile.namelist[i]->d_name, WINDOW_WIDTH - 4);
+            mvwprintw(ptr, i + 1, 1, buf);
+            wattroff(ptr, A_REVERSE);
         }
 
-        wrefresh(first_win);
+        wrefresh(ptr);
         
-        int val = wgetch(first_win);
+        int val = wgetch(ptr);
         switch(val)
         {
             case KEY_UP:
             {   
-                highlight--;
-                if (highlight < 0)
+                (*p_highlight)--;
+                if (*p_highlight < 0)
                 {
-                    highlight = 0;
+                    *p_highlight = 0;
                 }
                 break;
             }
             case KEY_DOWN:
             {   
-                highlight++;
-                if (highlight >= getfile.size)
+                (*p_highlight)++;
+                if (*p_highlight >= getfile.size)
                 {
-                    highlight = getfile.size - 1;
+                    *p_highlight = getfile.size - 1;
                 }
                 break;
             }
             case 10:
             {
-                if (getfile.namelist[highlight]->d_type != 4)
+                if (getfile.namelist[*p_highlight]->d_type != 4)
                 {
                     break;
                 }
 
-                if (0 == strcmp(getfile.namelist[highlight]->d_name, "."))
+                if (0 == strcmp(getfile.namelist[*p_highlight]->d_name, "."))
                 {
                     break;
                 }
                 
-                char pwd[1024] = {0};
-                getcwd(pwd, 1024);
+                if (0 == strcmp(getfile.namelist[*p_highlight]->d_name, ".."))
+                {
+                    int len = strlen(p_pwd) - 1;
+                    for (int i = len; i >= 0; i--)
+                    {
+                        if (p_pwd[i] == '/')
+                        {
+                            p_pwd[i] = '\0';
+                            break;
+                        }
+                    }
+                    if (strlen(p_pwd) == 0)
+                    {
+                        p_pwd[0] = '/';
+                        p_pwd[1] = 0;
+                    }
+
+                    chdir(p_pwd);
+                    free_files(ptr, &getfile);
+                    get_files(&getfile, p_pwd);
+                    *p_highlight = 0;
+                    break;
+                }
                 
-                strcat(pwd, "/");
-                strncat(pwd, getfile.namelist[highlight]->d_name, 1024);
-                chdir(pwd);
+                getcwd(p_pwd, 1024);
+                strcat(p_pwd, "/");
+                strncat(p_pwd, getfile.namelist[*p_highlight]->d_name, 1024);
+                chdir(p_pwd);
                 
-                free_files(first_win, &getfile);
-                get_files(&getfile, pwd);
-                highlight = 0;
+                free_files(ptr, &getfile);
+                get_files(&getfile, p_pwd);
+                *p_highlight = 0;
                 break;
+            }
+
+            case 9:
+            {
+                if (ptr == first_win)
+                {
+                    ptr = sec_win;
+                    p_pwd = pwd2;
+                    chdir(p_pwd);
+                    getcwd(p_pwd, 1024);
+                    p_highlight = &highlight2;
+                }
+                else if (ptr == sec_win)
+                {
+                    ptr = first_win;
+                    p_pwd = pwd1;
+                    chdir(p_pwd);
+                    getcwd(p_pwd, 1024);
+                    p_highlight = &highlight1;
+                }         
             }
         }
     }
