@@ -27,7 +27,6 @@ enum Window_borders
 
     WINDOW_2_TOP_BORDER = 0,
     WINDOW_2_SIDE_BORDER = WINDOW_SIDE_BORDER + WINDOW_WIDTH,
-    
 };
 
 void get_files(struct Getfiles *ptr, char *path)
@@ -43,7 +42,7 @@ void get_files(struct Getfiles *ptr, char *path)
 
 void free_files(WINDOW * menuwin, struct Getfiles *file)
 {
-    for (int i = 1; i < file->size; i++)
+    for (int i = 1; i < WINDOW_HEIGHT - 2; i++)
     {
         mvwprintw(menuwin, i + 1, 1, EMPTY_STR);
     }
@@ -70,10 +69,12 @@ int main()
     int xMax = 0;
     getmaxyx(stdscr, yMax, xMax);
 
-    WINDOW *first_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_TOP_BORDER, WINDOW_SIDE_BORDER);
+    WINDOW *first_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, 
+                               WINDOW_TOP_BORDER, WINDOW_SIDE_BORDER);
     box(first_win, 0, 0);
 
-    WINDOW *sec_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_2_TOP_BORDER, WINDOW_2_SIDE_BORDER);
+    WINDOW *sec_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, 
+                             WINDOW_2_TOP_BORDER, WINDOW_2_SIDE_BORDER);
     box(sec_win, 0, 0);
 
     WINDOW *ptr = first_win;
@@ -98,6 +99,26 @@ int main()
 
     struct Getfiles getfile = {0};
     get_files(&getfile, p_pwd);
+
+    for (int i = 0; i < getfile.size; i++)
+    {
+        if (i == WINDOW_HEIGHT - 2)
+        {
+            break;
+        }
+        
+        char buf[256] = "/";
+        if (getfile.namelist[i]->d_type != 4)
+        {
+            buf[1] = '.';
+        }
+
+        strncat(buf, getfile.namelist[i]->d_name, WINDOW_WIDTH - 4);
+        mvwprintw(sec_win, i + 1, 1, buf);
+    }
+
+    wrefresh(sec_win);
+
     while(1)
     {
         for (int i = 0; i < getfile.size; i++)
@@ -195,6 +216,8 @@ int main()
 
             case 9:
             {
+                free_files(ptr, &getfile);
+                
                 if (ptr == first_win)
                 {
                     ptr = sec_win;
@@ -202,6 +225,7 @@ int main()
                     chdir(p_pwd);
                     getcwd(p_pwd, 1024);
                     p_highlight = &highlight2;
+                    
                 }
                 else if (ptr == sec_win)
                 {
@@ -210,11 +234,12 @@ int main()
                     chdir(p_pwd);
                     getcwd(p_pwd, 1024);
                     p_highlight = &highlight1;
-                }         
+                } 
+
+                get_files(&getfile, p_pwd);
             }
         }
     }
-
     endwin();
     return 0;
 }
