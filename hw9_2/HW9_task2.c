@@ -6,8 +6,11 @@ ncurses.*/
 #include <stdio.h>
 #include <ncurses.h>
 #include <dirent.h>
+#include <string.h>
+#include <stdlib.h>
+#define EMPTY_STR "                                 "
 
-struct get_files
+struct Getfiles
 {
     struct dirent **namelist;
     int size;
@@ -21,7 +24,7 @@ enum Window_borders
     WINDOW_SIDE_BORDER = 1,
 };
 
-void get_files(struct get_files *ptr, char *path)
+void get_files(struct Getfiles *ptr, char *path)
 {      
     int count = scandir(path, &ptr->namelist, 0, alphasort);
     if (-1 == count)
@@ -30,6 +33,31 @@ void get_files(struct get_files *ptr, char *path)
     }
 
     ptr->size = count;
+}
+
+void free_files(WINDOW * menuwin, struct Getfiles *file)
+{
+    for (int i = 0; i < file->size; i++)
+    {
+        mvwprintw(menuwin, i + 1, 1, EMPTY_STR);
+    }
+    
+    while(file->size--)
+    {
+        if (file->namelist[file->size])
+        {
+            free(file->namelist[file->size]);
+            file->namelist[file->size] = NULL;
+        }
+    }
+
+    if (file->namelist)
+    {
+        free(file->namelist);
+        file->namelist = NULL;
+    }
+
+    file->size = 0;
 }
 
 int main()
@@ -56,7 +84,7 @@ int main()
 
     while(1)
     {
-        struct get_files getfile = {0};
+        struct Getfiles getfile = {0};
         get_files(&getfile, "./");  
 
         for (int i = 0; i < getfile.size; i++)
@@ -65,8 +93,15 @@ int main()
             {
                 wattron(first_win, A_REVERSE);
             }
- 
-            mvwprintw(first_win, i + 1, 1, getfile.namelist[i]->d_name);
+            
+            char buf[32] = "/";
+            if (getfile.namelist[i]->d_type != 4)
+            {
+                buf[1] = '.';
+            }
+
+            strncat(buf, getfile.namelist[i]->d_name, 32);
+            mvwprintw(first_win, i + 1, 1, buf);
             wattroff(first_win, A_REVERSE);
         }
 
@@ -92,6 +127,29 @@ int main()
                     highlight = getfile.size - 1;
                 }
                 break;
+            }
+            case 10:
+            {
+                if (getfile.namelist[highlight]->d_type != 4)
+                {
+                    break;
+                }
+
+                if (0 == strcmp(getfile.namelist[highlight]->d_name, "."))
+                {
+                    break;
+                }
+
+                if (0 == strcmp(getfile.namelist[highlight]->d_name, ".."))
+                {
+
+
+                }
+                
+                
+                free_files(first_win, &getfile);
+                wrefresh(first_win);
+                sleep(4);
             }
         }
     }
