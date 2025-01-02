@@ -24,6 +24,10 @@ enum Window_borders
     WINDOW_WIDTH = 40,
     WINDOW_TOP_BORDER = 0,
     WINDOW_SIDE_BORDER = 1,
+
+    WINDOW_2_TOP_BORDER = 0,
+    WINDOW_2_SIDE_BORDER = WINDOW_SIDE_BORDER + WINDOW_WIDTH,
+    
 };
 
 void get_files(struct Getfiles *ptr, char *path)
@@ -76,10 +80,15 @@ int main()
     WINDOW *first_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_TOP_BORDER, WINDOW_SIDE_BORDER);
     box(first_win, 0, 0);
 
+    WINDOW *sec_win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_2_TOP_BORDER, WINDOW_2_SIDE_BORDER);
+    box(sec_win, 0, 0);
+
     refresh();
     wrefresh(first_win);
+    wrefresh(sec_win);
 
     keypad(first_win, true);
+    keypad(sec_win, true);
 
     
     int highlight = 0;
