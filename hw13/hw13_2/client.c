@@ -61,8 +61,10 @@ int main()
     message.id = getpid();
     strcpy(message.name, "Maria");
     message.can_i_join = true;
-    snprintf(message.queue_name, sizeof(message.queue_name), TESAT, 228);
+    snprintf(message.queue_name, sizeof(message.queue_name), TESAT, getpid());
     printf("Queue name: %s\n", message.queue_name);
+
+    struct Message tmp = {0};
 
     int prio1 = 0;
 
@@ -89,35 +91,30 @@ int main()
         func();
         return -1;
     }
-    
-    int count = 0;
+  
+    mq_send(qd_sent, (const char *)&message, sizeof(struct Message), prio1);
 
-    char txt[MESSAGESIZE] = {0};
-
-    printf("Enter message: ");
-    scanf("%s", message.text);
-
-    mq_send(qd_sent, (const char *)&message, sizeof(message), prio1);
-
-    while(1)
+    for (int i = 0; i < 32; i++)
     {
-        mq_receive(qd_receive, (char *)&message, sizeof(message), &prio1);
-        printf("%s\n", message.text);
-        message.can_i_join = false;
-
+        mq_receive(qd_receive, (char *)&tmp, sizeof(struct Message), &prio1);
+        printf("%s: %s\n", tmp.name, tmp.text);
+        if (true == message.can_i_join)
+        {
+            message.can_i_join = false;
+        }
+        if (0 == strlen(tmp.text))
+        {
+            break;
+        }
     }
 
     while(1)
     {
         printf("Enter message: ");
         scanf("%s", message.text);
-        printf("%s\n", message.name);
-
-        
-
-
-        printf("%s: %s\n", message.name, txt);
+        mq_send(qd_sent, (const char *)&message, sizeof(struct Message), prio1);
     }
 
+    func();
     return 0;
 }
