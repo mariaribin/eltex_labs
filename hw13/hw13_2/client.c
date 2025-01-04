@@ -20,13 +20,19 @@ THIS IS THE CLIENT*/
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <pthread.h>
 #include "history.h"
-#define MESSAGENUMBER 10
 
 mqd_t qd_sent = 0;
 mqd_t qd_receive = 0;
 
-void func()
+struct Arg
+{
+    struct Message *p_message;
+
+};
+
+void clean()
 {
     int ret = 0;
     
@@ -47,10 +53,26 @@ void func()
     exit(0);
 }
 
+void* send(void *arg)
+{
+    while (1)
+    {
+        struct Arg *args = (struct Arg *)arg;
+        if (!args)
+        {
+            return NULL;
+        }
+
+        printf("Enter message: ");
+        scanf("%s", args->p_message->text);
+        mq_send(qd_sent, (const char *)args->p_message, sizeof(struct Message), PRIO);
+    }
+}
+
 int main()
 {   
     struct sigaction sig = {0};
-    sig.sa_handler = func;
+    sig.sa_handler = clean;
     int ret = sigaction(SIGINT, &sig, NULL);
     if (-1 == ret)
     {
@@ -59,10 +81,14 @@ int main()
 
     struct Message message = {0};
     message.id = getpid();
-    strcpy(message.name, "Maria");
+    char buf[10] = {0};
+
+    printf("Enter name: ");
+    scanf("%s", buf);
+    strcpy(message.name, buf);
+
     message.can_i_join = true;
-    snprintf(message.queue_name, sizeof(message.queue_name), TESAT, getpid());
-    printf("Queue name: %s\n", message.queue_name);
+    snprintf(message.queue_name, sizeof(message.queue_name), MYQUEUE, getpid());
 
     struct Message tmp = {0};
 
@@ -76,7 +102,7 @@ int main()
     if (-1 == qd_sent)
     {
         perror("\nCreating messages queue failed");
-        func();
+        clean();
         return -1;
     }
 
@@ -88,11 +114,11 @@ int main()
     if (-1 == qd_sent)
     {
         perror("\nCreating messages queue failed");
-        func();
+        clean();
         return -1;
     }
   
-    mq_send(qd_sent, (const char *)&message, sizeof(struct Message), prio1);
+    mq_send(qd_sent, (const char *)&message, sizeof(struct Message), PRIO);
 
     for (int i = 0; i < 32; i++)
     {
@@ -108,13 +134,32 @@ int main()
         }
     }
 
+    struct Arg arg = {0};
+    arg.p_message = &message;
+
+    pthread_t thread = 0;
+    pthread_create(&thread, NULL, send, &arg);
+    pthread_detach(thread);
+
     while(1)
     {
-        printf("Enter message: ");
-        scanf("%s", message.text);
-        mq_send(qd_sent, (const char *)&message, sizeof(struct Message), prio1);
+        mq_receive(qd_receive, (char *)&tmp, sizeof(struct Message), &prio1);
+
+        if (2 == prio1)
+        {
+            printf("%s\n", tmp.text);
+        }
+        else
+        {
+            printf("%s: %s\n", tmp.name, tmp.text);
+        }
+        //if (0 != strcmp(tmp.queue_name, message.queue_name))
+       // {
+            //printf("%s: %s\n", tmp.name, tmp.text);
+       // } 
+        
     }
 
-    func();
+    clean();
     return 0;
 }

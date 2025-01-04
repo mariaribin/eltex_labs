@@ -1,8 +1,9 @@
 #define MESSAGESIZE 32
 #define INPUT_MESSAGE_QUEUE "/new_queue"
 #define OUTPUT_MESSAGE_QUEUE "/service_queue"
-
-#define TESAT "/queue_%d"
+#define MESSAGENUMBER 10
+#define MYQUEUE "/queue_%d"
+#define PRIO 0
 
 #include <stdbool.h>
 
