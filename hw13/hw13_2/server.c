@@ -22,18 +22,18 @@ THIS IS THE SERVER*/
 #include <sys/stat.h>
 #include "history.h"
 #define MESSAGENUMBER 10
-#define RECEIVED "/new_queue"
 #define MESSAGE_PRIO_1 1
 #define MESSAGE_PRIO_2 2
 #define MESSAGE_PRIO_3 3
 
 mqd_t qd_received = 0;
+mqd_t qd_clients[5] = {0};
 
 void func()
 {
     int ret = 0;
  
-    ret = mq_unlink(RECEIVED);
+    ret = mq_unlink(INPUT_MESSAGE_QUEUE);
     if (-1 == ret)
     {
         perror("\nQueue already removed");
@@ -52,6 +52,7 @@ void func()
 int main()
 {   
     int i = 0;
+
     
     struct sigaction sig = {0};
     sig.sa_handler = func;
@@ -61,34 +62,84 @@ int main()
         perror("\nsigaction() failed");
     }
 
-    struct Message message[1024] = {0};
+    struct Message message[32] = {0};
   
     int prio1 = 0;
-    char history[5][MESSAGESIZE] = {"One", "Two", "Three", "Four", "Five"};
-    //char message[MESSAGESIZE] = {0};
-    
-    struct mq_attr attr_received;
+
+    struct mq_attr attr_received = {0};
     attr_received.mq_msgsize = sizeof(struct Message);
     attr_received.mq_maxmsg = MESSAGENUMBER;
+    
+    
 
-    qd_received = mq_open(RECEIVED, O_CREAT | O_RDWR, 0600, &attr_received);
+    qd_received = mq_open(INPUT_MESSAGE_QUEUE, O_CREAT | O_RDWR, 0600, &attr_received);
     if (-1 == qd_received)
     {
         perror("\nCreating members queue failed");
         return -1;
     }
 
+    i = 0;
+
+    int storage_ind = 0;
+    int client_ind = 0;
+
+
+
     while(1)
     {
-        struct Message tmp = {0};
-        ret = mq_receive(qd_received, (char *)&tmp, sizeof(tmp), &prio1);
-        
-        printf("%s: %s\n", tmp.name, tmp.text);
-        i++;
-    
-    }
-    
-    
+         
+        struct Message tmp = {0}; 
+         
+            printf("123\n");
+        ret = mq_receive(qd_received, (char *)&message[storage_ind], sizeof(struct Message), &prio1);
+        if (-1 == ret)
+        {
+            perror("Receive failed");
+            break;
+        }
 
+        if (message[storage_ind].can_i_join == true)
+        { 
+            //printf("%s: %s\n", message[storage_ind].name, message[storage_ind].text);  
+            printf("Queue name = %s\n", message[storage_ind].queue_name);
+
+            struct mq_attr attr123_received = {0};
+            attr123_received.mq_msgsize = sizeof(struct Message);
+            attr123_received.mq_maxmsg = MESSAGENUMBER;
+
+            qd_clients[client_ind] = mq_open("/queue_228", O_CREAT | O_RDWR, 0600, &attr123_received);
+            if (-1 == qd_clients[client_ind])
+            {
+                perror("Open queue failed");
+                break;
+            }
+
+            int j = 0;
+
+            ret = mq_send(qd_clients[client_ind], (const char *)&message[j], sizeof(struct Message), prio1);
+            if (-1 == ret)
+            {
+                perror("Send failed");
+                break;
+            }
+
+            /*while(1)
+            {
+                mq_send(qd_clients[i], (const char *)&message[j], sizeof(struct Message), 1);
+                j++;
+                if (message[j].text[0] == 0)
+                {
+                    break;
+                }
+            }*/
+
+            client_ind++;
+        }
+
+        storage_ind++;
+    }
+
+    func(); 
     return 0;
 }
