@@ -22,7 +22,6 @@ THIS IS THE SERVER*/
 #include <sys/stat.h>
 #include "history.h"
 
-
 mqd_t qd_received = 0;
 mqd_t qd_clients[5] = {0};
 
@@ -49,6 +48,7 @@ void clean()
 int main()
 {   
     int i = 0;
+    int prio1 = 0;
 
     struct sigaction sig = {0};
     sig.sa_handler = clean;
@@ -59,13 +59,7 @@ int main()
     }
 
     struct Message message[32] = {0};
-    /*strcpy(message[0].text, "Hi");
-    strcpy(message[1].text, "Hi1");
-    strcpy(message[2].text, "Hi2");*/
-    int prio1 = 0;
-
     struct Message newclient = {0};
-    //strcpy(newclient.text);
 
     struct mq_attr attr_received = {0};
     attr_received.mq_msgsize = sizeof(struct Message);
@@ -134,11 +128,13 @@ int main()
             client_ind++;
             history_ind = 0;
 
-            for (int i = 0; i < client_ind; i++)
-            {
-                snprintf(newclient.text, sizeof(newclient.text), "%s joined!", tmp.name);
+            snprintf(newclient.text, sizeof(newclient.text), "[%s joined!]", tmp.name);
 
-                ret = mq_send(qd_clients[i], (const char *)&newclient, sizeof(struct Message), 2);
+            unsigned int prio2 = 2;
+
+            for (int i = 0; i < client_ind - 1; i++)
+            {
+                ret = mq_send(qd_clients[i], (const char *)&newclient, sizeof(struct Message), prio2);
                 if (-1 == ret)
                 {
                     perror("Send failed");

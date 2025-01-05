@@ -40,12 +40,7 @@ enum Window_borders
     WINDOW_2_SIDE_BORDER = 1,
 };
 
-struct Arg
-{
-    struct Message *p_message;
-};
-
-/*void clean()
+void clean(char queue[])
 {
     int ret = 0;
     
@@ -61,16 +56,29 @@ struct Arg
         perror("\nQueue already removed");
     }
 
+    ret = mq_close(qd_receive);
+    if (-1 == ret)
+    {
+        perror("\nClosing queue error");
+    }
+
+    ret = mq_unlink(queue);
+    if (-1 == ret)
+    {
+        perror("\nQueue already removed");
+    }
+
     printf("\ncleaned queue!\n");
 
     exit(0);
-}*/
+}
 
 void* send(void *arg)
 {
+    int ret = 0;
     char buf[20] = {0};
     
-    struct Arg *args = (struct Arg *)arg;
+    struct Message *args = (struct Message *)arg;
     if (!args)
     {
         return NULL;
@@ -78,18 +86,23 @@ void* send(void *arg)
     
     while (1)
     {
-        mvwprintw(args->p_message->p_win2, 2, 18, "         ");
-        wrefresh(args->p_message->p_win2);
-        mvwscanw(args->p_message->p_win2, 2, 18, "%s", buf);
-        wrefresh(args->p_message->p_win2);
-        strcpy(args->p_message->text, buf);
-        mq_send(qd_sent, (const char *)args->p_message, sizeof(struct Message), PRIO);
+        mvwscanw(args->p_win2, 2, 18, "%s", buf);
+        wrefresh(args->p_win2);
+        strcpy(args->text, buf);
+        ret = mq_send(qd_sent, (const char *)args, 
+                      sizeof(struct Message), PRIO);
+        if (-1 == ret)
+        {
+            perror("mq_send() failed");
+        }
+        mvwprintw(args->p_win2, 2, 18, "                   ");
+        wrefresh(args->p_win2);    
     }
 }
 
 int main()
 {
-   /* struct sigaction sig = {0};
+    /*struct sigaction sig = {0};
     sig.sa_handler = clean;
     int ret = sigaction(SIGINT, &sig, NULL);
     if (-1 == ret)
@@ -97,12 +110,13 @@ int main()
         perror("\nsigaction() failed");
     }*/
 
-    struct Message message = {0};
-    message.id = getpid();
-    char buf[10] = {0};
+    struct Message tmp = {0};
+    struct Message send_message = {0};
+    send_message.id = getpid();
+    send_message.can_i_join = true;
+    snprintf(send_message.queue_name, sizeof(send_message.queue_name), MYQUEUE, getpid());
 
     initscr();
-    //noecho();
     cbreak();
     curs_set(0);
 
@@ -118,8 +132,8 @@ int main()
                              WINDOW_2_TOP_BORDER, WINDOW_2_SIDE_BORDER);
     box(sec_win, 0, 0);
 
-    message.p_win1 = first_win;
-    message.p_win2 = sec_win;
+    send_message.p_win1 = first_win;
+    send_message.p_win2 = sec_win;
 
     refresh();
     wrefresh(first_win);
@@ -131,22 +145,15 @@ int main()
     mvwprintw(sec_win, 2, 2, "Enter name: ");
     wrefresh(sec_win);
 
-    char sym = 0;
-    int i = 0;
-    
-    mvwscanw(sec_win, 2, 18 + i, "%s", buf);
-    strcpy(message.name, buf);
+    char buf[10] = {0}; 
+    mvwscanw(sec_win, 2, 18, "%s", buf);
+    strcpy(send_message.name, buf);
     wrefresh(sec_win);
 
-    char buf1[30] = {0};
-    snprintf(buf1, sizeof(buf1), "%s joined!", message.name);
+    char joined[30] = {0};
+    snprintf(joined, sizeof(joined), "[%s joined!]", send_message.name);
 
-    message.can_i_join = true;
-    snprintf(message.queue_name, sizeof(message.queue_name), MYQUEUE, getpid());
-
-    struct Message tmp = {0};
-
-    int prio1 = 0;
+    unsigned int prio1 = 0;
 
     struct mq_attr attr_sent = {0};
     attr_sent.mq_msgsize = sizeof(struct Message);;
@@ -155,8 +162,8 @@ int main()
     qd_sent = mq_open(INPUT_MESSAGE_QUEUE, O_CREAT | O_RDWR, 0600, &attr_sent);
     if (-1 == qd_sent)
     {
-        perror("\nCreating messages queue failed");
-        //clean();
+        perror("\nmq_open() failed");
+        clean(send_message.queue_name);
         return -1;
     }
 
@@ -164,60 +171,62 @@ int main()
     attr_receive.mq_msgsize = sizeof(struct Message);;
     attr_receive.mq_maxmsg = MESSAGENUMBER;
 
-    qd_receive = mq_open(message.queue_name, O_CREAT | O_RDWR, 0600, &attr_receive);
+    qd_receive = mq_open(send_message.queue_name, O_CREAT | O_RDWR, 0600, &attr_receive);
     if (-1 == qd_sent)
     {
-        perror("\nCreating messages queue failed");
-        //clean();
+        perror("\nmq_open() failed");
+        clean(send_message.queue_name);
         return -1;
     }
   
-    mq_send(qd_sent, (const char *)&message, sizeof(struct Message), PRIO);
+    mq_send(qd_sent, (const char *)&send_message, sizeof(struct Message), PRIO);
 
-    for (i = 0; i < 32; i++)
+    int i = 1;
+
+    for (i; i < 32; )
     {
-        mq_receive(qd_receive, (char *)&tmp, sizeof(struct Message), &prio1);
-        if (0 == strcmp(tmp.text, buf1))
-        {
-            continue;
-        } 
+        mq_receive(qd_receive, (char *)&tmp, sizeof(struct Message), &prio1); 
         if (0 == strlen(tmp.text))
         {
+            send_message.can_i_join = false;
+            wrefresh(first_win);
             break;
         }
-        
-        mvwprintw(first_win, 2 + i, 2, "%s: %s", tmp.name, tmp.text);
-        wrefresh(first_win);
-
-        if (true == message.can_i_join)
+        else
         {
-            message.can_i_join = false;
+            mvwprintw(first_win, i + 1, 2, "%s: %s", tmp.name, tmp.text);   
         }
+        send_message.can_i_join = false;
+        wrefresh(first_win);
+        i++;
     }
 
-    mvwprintw(sec_win, 2, 18, "         ");
+    mvwprintw(sec_win, 2, 18, "                   ");
     wrefresh(sec_win);
     mvwprintw(sec_win, 2, 2, "Enter message: ");
     wrefresh(sec_win);
 
-    struct Arg arg = {0};
-    arg.p_message = &message;
-
     pthread_t thread = 0;
-    pthread_create(&thread, NULL, send, &arg);
+    pthread_create(&thread, NULL, send, &send_message);
     pthread_detach(thread);
 
     while(1)
     {
         mq_receive(qd_receive, (char *)&tmp, sizeof(struct Message), &prio1);
-
+        if (0 == strlen(tmp.text))
+        {
+            mvwprintw(first_win, 1, 4, "%s", "No messages in this chat yet.");
+            mvwprintw(first_win, 2, 15, "%s", "Be first!");
+            wrefresh(first_win);
+            continue;
+        }  
         if (2 == prio1)
         {
-            mvwprintw(first_win, 2 + i, 2, "%s", tmp.text);
+            mvwprintw(first_win, i + 3, 15, "%s", tmp.text);
         }
         else
         {
-            mvwprintw(first_win, 2 + i, 2, "%s: %s", tmp.name, tmp.text);
+            mvwprintw(first_win, i + 3, 2, "%s: %s", tmp.name, tmp.text);
         }
        
         wrefresh(first_win);
