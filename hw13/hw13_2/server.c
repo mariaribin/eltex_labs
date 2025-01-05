@@ -21,7 +21,7 @@ THIS IS THE SERVER*/
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "history.h"
-#define MESSAGENUMBER 10
+
 
 mqd_t qd_received = 0;
 mqd_t qd_clients[5] = {0};

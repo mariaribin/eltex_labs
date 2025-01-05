@@ -6,12 +6,15 @@
 #define PRIO 0
 
 #include <stdbool.h>
+#include <ncurses.h>
 
 struct Message
 {
     int id;
     char text[MESSAGESIZE];
-    char name[16];
+    char name[8];
     char queue_name[32];
-    bool can_i_join; 
+    bool can_i_join;
+    WINDOW *p_win1;
+    WINDOW *p_win2;
 };
