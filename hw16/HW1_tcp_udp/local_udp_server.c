@@ -39,7 +39,8 @@ int main()
     struct sockaddr addr;
     socklen_t len = sizeof(addr);
 
-    ret = recvfrom(server_socket, &message, sizeof(message), 0, (struct sockaddr *restrict)&addr, &len);
+    ret = recvfrom(server_socket, &message, sizeof(message), 
+                   0, (struct sockaddr *restrict)&addr, &len);
     if (-1 == ret)
     {
         perror("Reception from client failed.");
@@ -50,7 +51,8 @@ int main()
 
     printf("Client sent: %s\n", message);
 
-    ret = sendto(server_socket, server_message, sizeof(server_message), 0, (struct sockaddr *restrict)&addr, len);
+    ret = sendto(server_socket, server_message, sizeof(server_message),
+                 0, (struct sockaddr *restrict)&addr, len);
     if (-1 == ret)
     {
         perror("Sending to client failed");

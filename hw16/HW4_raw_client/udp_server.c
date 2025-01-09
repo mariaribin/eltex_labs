@@ -1,9 +1,14 @@
+/*Написать RAW-сокет. UDP-сервер ждет строку от клиента на RAW-сокете 
+и отвечает приветственным сообщением. */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#define ADDR "192.168.0.114"
 
 int main()
 {
@@ -23,7 +28,7 @@ int main()
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(5000);
-    server_address.sin_addr.s_addr = INADDR_ANY;
+    inet_pton(AF_INET, ADDR, &server_address.sin_addr.s_addr);
 
     ret = bind(server_socket, (const struct sockaddr*)&server_address, sizeof(server_address));
     if (-1 == ret)
@@ -46,8 +51,9 @@ int main()
     }
 
     printf("Client sent: %s\n", message);
+    fflush(stdout);
 
-    ret = sendto(server_socket, server_message, sizeof(server_message),
+    ret = sendto(server_socket, server_message, sizeof(server_message), 
                  0, (struct sockaddr *restrict)&addr, len);
     if (-1 == ret)
     {

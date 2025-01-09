@@ -1,3 +1,6 @@
+/*Сервер с очередью сообщений*/
+
+
 #include <fcntl.h>  
 #include <mqueue.h>
 #include <string.h>

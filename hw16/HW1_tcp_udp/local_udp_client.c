@@ -44,7 +44,8 @@ int main()
     printf("Type message for server: ");
     fgets(message, sizeof(message), stdin);
     
-    ret = sendto(network_socket, message, sizeof(message), 0, (const struct sockaddr *)&server_address, sizeof(struct sockaddr));
+    ret = sendto(network_socket, message, sizeof(message), 0, 
+                 (const struct sockaddr *)&server_address, sizeof(struct sockaddr));
     if (-1 == ret) 
     {
         perror("Sending to server failed");

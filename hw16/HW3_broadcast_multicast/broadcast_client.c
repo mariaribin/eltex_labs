@@ -4,13 +4,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#define BUFSIZE 32
 
 int main()
 {
     int network_socket = 0;
     int ret = 0;
-    char response[10] = {0};
-    char message[10] = {0};
+    char response[BUFSIZE] = {0};
 
     network_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (-1 == network_socket)
@@ -19,24 +19,22 @@ int main()
         return -1;
     }
 
-    struct sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(5000);
-    server_address.sin_addr.s_addr = INADDR_ANY;
+    struct sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_port = htons(5000);
+    address.sin_addr.s_addr = INADDR_BROADCAST;
 
-    printf("Type message for server: ");
-    fgets(message, sizeof(message), stdin);
-
-    ret = sendto(network_socket, message, sizeof(message), 
-                 0, (const struct sockaddr*)&server_address, sizeof(server_address));
+    ret = bind(network_socket, 
+               (const struct sockaddr*)&address, 
+               sizeof(address));
     if (-1 == ret)
     {
-        perror("Sending to server failed");
+        perror("Binding to socket failed.");
         close(network_socket);
         return -1;
     }
 
-    ret = recvfrom(network_socket, &response, sizeof(response), 0, NULL, NULL);
+    ret = recv(network_socket, &response, sizeof(response), 0);
     if (-1 == ret)
     {
         perror("Reception from server failed.");
