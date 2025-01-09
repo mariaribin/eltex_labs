@@ -1,3 +1,6 @@
+#ifndef HISTORY_H_NAME
+#define HISTORY_H_NAME
+
 #define MESSAGESIZE 32
 #define INPUT_MESSAGE_QUEUE "/new_queue"
 #define OUTPUT_MESSAGE_QUEUE "/service_queue"
@@ -18,3 +21,5 @@ struct Message
     WINDOW *p_win1;
     WINDOW *p_win2;
 };
+
+#endif
