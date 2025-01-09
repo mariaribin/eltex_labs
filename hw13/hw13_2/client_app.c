@@ -86,7 +86,8 @@ void* send(void *arg)
     
     while (1)
     {
-        mvwscanw(args->p_win2, 2, 18, "%s", buf);
+        //mvwscanw(args->p_win2, 2, 18, "%s", buf);
+        mvwgetstr(args->p_win2, 2, 18, buf);
         wrefresh(args->p_win2);
         strcpy(args->text, buf);
         ret = mq_send(qd_sent, (const char *)args, 
