@@ -5,29 +5,24 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <semaphore.h>
 
+#define SEMNAME "/test_sem123"
 #define SHARED_MEMORY_OBJECT_NAME "/test_shmemory"
 #define SHARED_MEMORY_OBJECT_SIZE 128
-
-#define TEST_STR "HELLO_WORLD!!!!"
+#define TEST_STR "Hi!"
 
 int main ()
 {
     int shm = 0;
     int ret = 0;
+    sem_t *sem;
     char *addr = NULL;
-    
-    shm = shm_open(SHARED_MEMORY_OBJECT_NAME, O_CREAT | O_EXCL | O_RDWR, 0600);
+
+    shm = shm_open(SHARED_MEMORY_OBJECT_NAME, O_EXCL | O_RDWR, 0600);
     if (-1 == shm)
     {
         perror("shm_open() failed");
-        return -1;
-    }
-
-    ret = ftruncate(shm, SHARED_MEMORY_OBJECT_SIZE);
-    if (-1 == ret)
-    {
-        perror("ftruncate() failed");
         return -1;
     }
 
@@ -38,17 +33,29 @@ int main ()
         return -1;
     }
 
-    // set data
+    sem = sem_open(SEMNAME, 0);
+    if (SEM_FAILED == sem)
+    {
+        perror("sem_open()");
+        return -1;
+    }
+
+    printf("Server answered: %s\n", addr);
+
+    ret = sem_wait(sem);
+    if (-1 == ret)
+    {
+        perror("sem_wait");
+        return -1;
+    }
+
     memcpy(addr, TEST_STR, sizeof(TEST_STR));
 
-    while (1)
+    ret = sem_post(sem);
+    if (-1 == ret)
     {
-        sleep(1);
-        if (0 != strncmp(TEST_STR, addr, sizeof(TEST_STR)))
-        {
-            printf("Got message: %s\n", addr);
-            break;
-        }
+        perror("sem_post");
+        return -1;
     }
 
     ret = munmap(addr, SHARED_MEMORY_OBJECT_SIZE);
@@ -65,12 +72,7 @@ int main ()
         return -1;
     }
 
-    ret = shm_unlink(SHARED_MEMORY_OBJECT_NAME);
-    if (-1 == ret)
-    {
-        perror("shm_unlink() failed");
-        return -1; 
-    }
-
+    sem_close(sem);
+    sem_unlink(SEMNAME);
     return 0;
 }
