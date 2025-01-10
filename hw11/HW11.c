@@ -186,7 +186,7 @@ int main()
     {
         perror("pthread_create() failed");
         pthread_mutex_destroy(&g_mutex);
-        return 0;
+        return -1;
     }
 
     for (int i = 0; i < (THREADS - 1); i++)
@@ -196,7 +196,7 @@ int main()
         {
             perror("pthread_create() failed");
             pthread_mutex_destroy(&g_mutex);
-            return 0;
+            return -1;
         }
     }
 
